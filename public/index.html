@@ -150,34 +150,188 @@
 
     <section class="survey-section section" id="survey" aria-labelledby="surveyTitle">
       <div class="container survey-heading reveal"><div class="eyebrow purple"><span class="eyebrow-pulse purple-pulse"></span> 04 / CÙNG LÊN TIẾNG</div><h2 id="surveyTitle" class="display-title">Thầy Cô mong muốn<br/>Ez-Elearning <span class="serif-accent">như thế nào?</span></h2><p>Khoảng 4–6 phút. Không yêu cầu họ tên. Không có câu trả lời đúng hay sai — mọi ý kiến đều có giá trị.</p></div>
-      <div class="container survey-layout"><aside class="survey-sidebar"><div class="sidebar-sticky"><span class="sidebar-label">HÀNH TRÌNH KHẢO SÁT</span><div class="survey-track"><a href="#part1" data-step="1" class="track-item active"><span>01</span><b>Về Thầy Cô</b></a><a href="#part2" data-step="2" class="track-item"><span>02</span><b>Trải nghiệm AI</b></a><a href="#part3" data-step="3" class="track-item"><span>03</span><b>Chi phí phù hợp</b></a><a href="#part4" data-step="4" class="track-item"><span>04</span><b>Điều Thầy Cô mong muốn</b></a></div><div class="sidebar-privacy"><span>♧</span><p>Câu trả lời chỉ được dùng để nghiên cứu nhu cầu và phát triển Ez-Elearning.</p></div></div></aside>
+      <div class="container survey-layout"><aside class="survey-sidebar"><div class="sidebar-sticky"><span class="sidebar-label">HÀNH TRÌNH KHẢO SÁT</span><div class="survey-track">
+            <a href="#part1" data-step="1" class="track-item active"><span>01</span><b>Về Thầy Cô</b></a>
+            <a href="#part2" data-step="2" class="track-item"><span>02</span><b>Nhu cầu sư phạm</b></a>
+            <a href="#part3" data-step="3" class="track-item"><span>03</span><b>Chi phí linh hoạt</b></a>
+            <a href="#part4" data-step="4" class="track-item"><span>04</span><b>Ý kiến đóng góp</b></a>
+          </div><div class="sidebar-privacy"><span>♧</span><p>Câu trả lời chỉ được dùng để nghiên cứu nhu cầu và phát triển Ez-Elearning.</p></div></div></aside>
       <form id="surveyForm" class="survey-form" novalidate>
         <input type="text" name="website" class="bot-trap" tabindex="-1" autocomplete="off" aria-hidden="true"/>
-        <div class="form-section" id="part1"><div class="form-chapter"><span>CHƯƠNG 01 <i></i> 04</span><h3>Mình làm quen một chút nhé.</h3><p>Những thông tin cơ bản giúp chúng tôi hiểu nhu cầu theo từng cấp học.</p></div>
-          <fieldset class="question required" data-key="level"><legend><span class="q-count">01</span> Thầy/Cô đang giảng dạy ở cấp học nào? <span class="req">*</span></legend><div class="choice-grid two"><label class="choice"><input type="radio" name="level" value="Tiểu học" required/><span>Tiểu học <i>↗</i></span></label><label class="choice"><input type="radio" name="level" value="THCS"/><span>THCS <i>↗</i></span></label><label class="choice"><input type="radio" name="level" value="THPT"/><span>THPT <i>↗</i></span></label><label class="choice"><input type="radio" name="level" value="Cao đẳng / Đại học"/><span>Cao đẳng / Đại học <i>↗</i></span></label><label class="choice"><input type="radio" name="level" value="Khác"/><span>Khác <i>↗</i></span></label></div></fieldset>
-          <div class="question"><label class="field-label" for="subject"><span class="q-count">02</span> Thầy/Cô đang giảng dạy môn học nào?</label><input id="subject" name="subject" class="text-input" maxlength="120" placeholder="Ví dụ: Lịch sử, Toán, Ngữ văn..."/></div>
-          <fieldset class="question required" data-key="aiExperience"><legend><span class="q-count">03</span> Thầy/Cô đã từng sử dụng công cụ AI chưa? <span class="req">*</span></legend><div class="choice-stack"><label class="choice"><input type="radio" name="aiExperience" value="Sử dụng thường xuyên" required/><span>Sử dụng thường xuyên <i>↗</i></span></label><label class="choice"><input type="radio" name="aiExperience" value="Thỉnh thoảng sử dụng"/><span>Thỉnh thoảng sử dụng <i>↗</i></span></label><label class="choice"><input type="radio" name="aiExperience" value="Đã thử nhưng ít dùng"/><span>Đã thử nhưng ít sử dụng <i>↗</i></span></label><label class="choice"><input type="radio" name="aiExperience" value="Chưa từng sử dụng"/><span>Chưa từng sử dụng <i>↗</i></span></label></div></fieldset>
+        
+        <!-- CHƯƠNG 01 -->
+        <div class="form-section" id="part1">
+          <div class="form-chapter">
+            <span>CHƯƠNG 01 <i></i> 04</span>
+            <h3>Mình làm quen một chút nhé.</h3>
+            <p>Những thông tin cơ bản giúp chúng tôi hiểu nhu cầu theo từng cấp học và môn học.</p>
+          </div>
+
+          <fieldset class="question required" data-key="level">
+            <legend><span class="q-count">01</span> Thầy/Cô đang giảng dạy ở cấp học nào? <span class="req">*</span></legend>
+            <div class="choice-grid two">
+              <label class="choice"><input type="radio" name="level" value="Tiểu học" required/><span>Tiểu học <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="level" value="THCS"/><span>THCS <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="level" value="THPT"/><span>THPT <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="level" value="Cao đẳng / Đại học"/><span>Cao đẳng / Đại học <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="level" value="Khác"/><span>Khác <i>↗</i></span></label>
+            </div>
+          </fieldset>
+
+          <div class="question">
+            <label class="field-label" for="subject"><span class="q-count">02</span> Thầy/Cô đang giảng dạy môn học nào?</label>
+            <input id="subject" name="subject" class="text-input" maxlength="120" placeholder="Ví dụ: Lịch sử, Toán, Ngữ văn, KHTN..."/>
+          </div>
+
+          <fieldset class="question required" data-key="aiExperience">
+            <legend><span class="q-count">03</span> Thầy/Cô đã từng sử dụng công cụ AI (như ChatGPT, Copilot...) trong công việc chưa? <span class="req">*</span></legend>
+            <div class="choice-stack">
+              <label class="choice"><input type="radio" name="aiExperience" value="Sử dụng thường xuyên" required/><span>Sử dụng thường xuyên hàng tuần <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="aiExperience" value="Thỉnh thoảng sử dụng"/><span>Thỉnh thoảng sử dụng khi cần <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="aiExperience" value="Đã thử nhưng ít dùng"/><span>Đã dùng thử nhưng thấy chưa phù hợp <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="aiExperience" value="Chưa từng sử dụng"/><span>Chưa từng sử dụng <i>↗</i></span></label>
+            </div>
+          </fieldset>
         </div>
-        <div class="form-section" id="part2"><div class="form-chapter"><span>CHƯƠNG 02 <i></i> 04</span><h3>Trải nghiệm AI của Thầy Cô.</h3><p>Điều gì đang thuận tiện, điều gì còn gây khó khăn?</p></div>
-          <fieldset class="question"><legend><span class="q-count">04</span> Thầy/Cô muốn dùng AI để làm gì?</legend><p class="question-hint">Có thể chọn nhiều đáp án.</p><div class="choice-stack"><label class="choice check"><input type="checkbox" name="aiNeeds" value="Tạo hình ảnh minh họa"/><span>Tạo hình ảnh minh họa <i>+</i></span></label><label class="choice check"><input type="checkbox" name="aiNeeds" value="Tạo câu hỏi trắc nghiệm"/><span>Tạo câu hỏi trắc nghiệm <i>+</i></span></label><label class="choice check"><input type="checkbox" name="aiNeeds" value="Tạo đề kiểm tra theo ma trận"/><span>Tạo đề kiểm tra theo ma trận <i>+</i></span></label><label class="choice check"><input type="checkbox" name="aiNeeds" value="Hỏi đáp, tra cứu kiến thức"/><span>Hỏi đáp, tra cứu kiến thức <i>+</i></span></label><label class="choice check"><input type="checkbox" name="aiNeeds" value="Tóm tắt và xử lý tài liệu"/><span>Tóm tắt và xử lý tài liệu <i>+</i></span></label></div></fieldset>
-          <fieldset class="question"><legend><span class="q-count">05</span> Khó khăn lớn nhất khi tạo ảnh bằng AI là gì?</legend><p class="question-hint">Chọn những vấn đề Thầy/Cô từng gặp.</p><div class="choice-stack"><label class="choice check"><input type="checkbox" name="imageTroubles" value="Khó viết câu lệnh mô tả chi tiết"/><span>Khó viết câu lệnh mô tả chi tiết <i>+</i></span></label><label class="choice check"><input type="checkbox" name="imageTroubles" value="Ảnh chưa đúng nội dung"/><span>Ảnh chưa đúng nội dung <i>+</i></span></label><label class="choice check"><input type="checkbox" name="imageTroubles" value="Lỗi chữ hoặc dấu tiếng Việt"/><span>Lỗi chữ hoặc dấu tiếng Việt <i>+</i></span></label><label class="choice check"><input type="checkbox" name="imageTroubles" value="Phải tạo lại nhiều lần"/><span>Phải tạo lại nhiều lần <i>+</i></span></label><label class="choice check"><input type="checkbox" name="imageTroubles" value="Hết lượt tạo miễn phí"/><span>Hết lượt tạo miễn phí <i>+</i></span></label><label class="choice check"><input type="checkbox" name="imageTroubles" value="Chưa từng tạo ảnh AI"/><span>Chưa từng tạo ảnh AI <i>+</i></span></label></div></fieldset>
-          <fieldset class="question"><legend><span class="q-count">06</span> Thường mất bao nhiêu lần tạo để có ảnh ưng ý?</legend><div class="choice-grid two"><label class="choice"><input type="radio" name="imageRetries" value="1 lần"/><span>1 lần <i>↗</i></span></label><label class="choice"><input type="radio" name="imageRetries" value="2–3 lần"/><span>2–3 lần <i>↗</i></span></label><label class="choice"><input type="radio" name="imageRetries" value="4–5 lần"/><span>4–5 lần <i>↗</i></span></label><label class="choice"><input type="radio" name="imageRetries" value="Trên 5 lần"/><span>Trên 5 lần <i>↗</i></span></label><label class="choice"><input type="radio" name="imageRetries" value="Chưa từng sử dụng"/><span>Chưa từng sử dụng <i>↗</i></span></label></div></fieldset>
-          <fieldset class="question"><legend><span class="q-count">07</span> Điều nào quan trọng nhất khi tạo ảnh AI?</legend><div class="choice-stack"><label class="choice"><input type="radio" name="imageValue" value="Hình sắc nét, chuyên nghiệp"/><span>Hình sắc nét, chuyên nghiệp <i>↗</i></span></label><label class="choice"><input type="radio" name="imageValue" value="Chữ tiếng Việt chính xác"/><span>Chữ tiếng Việt chính xác <i>↗</i></span></label><label class="choice"><input type="radio" name="imageValue" value="Đúng kiến thức và chủ đề"/><span>Đúng kiến thức và chủ đề <i>↗</i></span></label><label class="choice"><input type="radio" name="imageValue" value="Ít phải tạo lại"/><span>Ít phải tạo lại <i>↗</i></span></label><label class="choice"><input type="radio" name="imageValue" value="Chi phí thấp"/><span>Chi phí thấp <i>↗</i></span></label></div></fieldset>
-          <fieldset class="question"><legend><span class="q-count">08</span> Trung bình mỗi tháng Thầy/Cô cần bao nhiêu lượt AI?</legend><div class="choice-grid two"><label class="choice"><input type="radio" name="monthlyUses" value="Dưới 20"/><span>Dưới 20 lượt <i>↗</i></span></label><label class="choice"><input type="radio" name="monthlyUses" value="20–50"/><span>20–50 lượt <i>↗</i></span></label><label class="choice"><input type="radio" name="monthlyUses" value="51–100"/><span>51–100 lượt <i>↗</i></span></label><label class="choice"><input type="radio" name="monthlyUses" value="101–200"/><span>101–200 lượt <i>↗</i></span></label><label class="choice"><input type="radio" name="monthlyUses" value="Trên 200"/><span>Trên 200 lượt <i>↗</i></span></label></div></fieldset>
+
+        <!-- CHƯƠNG 02 -->
+        <div class="form-section" id="part2">
+          <div class="form-chapter">
+            <span>CHƯƠNG 02 <i></i> 04</span>
+            <h3>Nhu cầu & Khó khăn sư phạm thực tế.</h3>
+            <p>Điều gì đang chiếm nhiều thời gian, điều gì còn gây trở ngại trong quá trình chuẩn bị bài giảng?</p>
+          </div>
+
+          <fieldset class="question" data-key="timeConsumingTasks">
+            <legend><span class="q-count">04</span> Trong các khâu chuẩn bị bài, khâu nào khiến Thầy/Cô mất nhiều thời gian nhất?</legend>
+            <p class="question-hint">Có thể chọn nhiều đáp án.</p>
+            <div class="choice-stack">
+              <label class="choice check"><input type="checkbox" name="timeConsumingTasks" value="Soạn giáo án theo Công văn 5512"/><span>Soạn kế hoạch bài dạy (giáo án) chi tiết theo Công văn 5512 <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="timeConsumingTasks" value="Ra đề trắc nghiệm ma trận 4 mức độ"/><span>Ra đề kiểm tra trắc nghiệm và cân đối ma trận 4 mức độ nhận thức <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="timeConsumingTasks" value="Vẽ sơ đồ tư duy tóm tắt bài học"/><span>Vẽ sơ đồ tư duy (Mindmap) hoặc tóm tắt hệ thống hóa bài học <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="timeConsumingTasks" value="Thiết kế ảnh bìa slide và minh họa"/><span>Thiết kế ảnh bìa slide bài giảng và hình minh họa trực quan <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="timeConsumingTasks" value="Tìm kiếm bài tập và ví dụ thực tế"/><span>Tìm kiếm bài tập vận dụng thực tế và ví dụ liên môn <i>+</i></span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question" data-key="lessonPlanTroubles">
+            <legend><span class="q-count">05</span> Khi soạn giáo án hoặc dùng AI hỗ trợ soạn bài, khó khăn lớn nhất của Thầy/Cô là gì?</legend>
+            <p class="question-hint">Chọn những vấn đề Thầy/Cô từng gặp.</p>
+            <div class="choice-stack">
+              <label class="choice check"><input type="checkbox" name="lessonPlanTroubles" value="AI trả lời chung chung, xa rời SGK"/><span>Nội dung AI tạo ra chung chung, không bám sát SGK và Yêu cầu cần đạt (GDPT 2018) <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="lessonPlanTroubles" value="Khó viết câu lệnh (prompt) đúng ý"/><span>Khó viết câu lệnh (prompt) dài dòng để AI hiểu đúng ý môn học <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="lessonPlanTroubles" value="Mất thời gian định dạng lại tệp Word"/><span>Mất nhiều thời gian định dạng lại bảng biểu sang tệp Word (.docx) <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="lessonPlanTroubles" value="Lo ngại kiến thức chưa chuẩn xác"/><span>Lo ngại kiến thức chưa chuẩn xác, phải kiểm tra đối chiếu lại nhiều lần <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="lessonPlanTroubles" value="Chưa tìm được công cụ tiếng Việt dễ dùng"/><span>Chưa tìm được công cụ tiếng Việt thân thiện, dễ dùng cho giáo viên <i>+</i></span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question" data-key="quizExpectations">
+            <legend><span class="q-count">06</span> Khi tạo đề kiểm tra trắc nghiệm, điều nào quan trọng nhất với Thầy/Cô?</legend>
+            <p class="question-hint">Có thể chọn nhiều đáp án.</p>
+            <div class="choice-stack">
+              <label class="choice check"><input type="checkbox" name="quizExpectations" value="Chia chuẩn ma trận 4 mức độ"/><span>Chia chuẩn 4 mức độ nhận thức (Nhận biết, Thông hiểu, Vận dụng, Vận dụng cao) <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="quizExpectations" value="Có đáp án đúng và lời giải chi tiết"/><span>Có sẵn đáp án đúng và lời giải chi tiết giải thích rõ ràng <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="quizExpectations" value="Xuất file Word chuẩn để in ra ngay"/><span>Xuất tải về tệp Word (.docx) chuẩn chỉnh để in ra ngay cho học sinh <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="quizExpectations" value="Cho phép sửa nhanh câu hỏi và đáp án"/><span>Cho phép sửa nhanh câu hỏi và đổi đáp án trực tiếp trên màn hình <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="quizExpectations" value="Có chế độ ẩn/hiện đáp án linh hoạt"/><span>Có chế độ in ẩn/hiện đáp án linh hoạt (đề bài riêng, lời giải riêng) <i>+</i></span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question" data-key="visualNeeds">
+            <legend><span class="q-count">07</span> Về phần hình ảnh và sơ đồ bài giảng, Thầy/Cô quan tâm nhất đến dạng nào?</legend>
+            <p class="question-hint">Có thể chọn nhiều đáp án.</p>
+            <div class="choice-stack">
+              <label class="choice check"><input type="checkbox" name="visualNeeds" value="Sơ đồ tư duy (Mindmap) trình chiếu"/><span>Sơ đồ tư duy (Mindmap) tóm tắt bài học, mở từng nhánh để trình chiếu <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="visualNeeds" value="Sơ đồ dòng thời gian hoặc xương cá"/><span>Sơ đồ dòng thời gian (Lịch sử) hoặc sơ đồ xương cá (Khoa học / Địa lý) <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="visualNeeds" value="Ảnh bìa slide 16:9 sắc nét có chỗ để chữ"/><span>Ảnh bìa slide bài giảng sắc nét 16:9, có khoảng trống an toàn để chèn tiêu đề <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="visualNeeds" value="Ảnh minh họa chuẩn chữ tiếng Việt"/><span>Ảnh minh họa không bị lỗi chữ và lỗi dấu tiếng Việt <i>+</i></span></label>
+              <label class="choice check"><input type="checkbox" name="visualNeeds" value="Bài tập điền khuyết tự động từ sơ đồ"/><span>Bài tập điền khuyết tự động tạo từ sơ đồ để học sinh ôn bài <i>+</i></span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question" data-key="monthlyWorkload">
+            <legend><span class="q-count">08</span> Trung bình mỗi tháng, Thầy/Cô cần chuẩn bị khoảng bao nhiêu bài giảng / đề kiểm tra?</legend>
+            <div class="choice-grid two">
+              <label class="choice"><input type="radio" name="monthlyWorkload" value="Dưới 10 bài"/><span>Dưới 10 bài / tháng <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="monthlyWorkload" value="10–25 bài"/><span>10–25 bài / tháng <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="monthlyWorkload" value="26–50 bài"/><span>26–50 bài / tháng <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="monthlyWorkload" value="Trên 50 bài"/><span>Trên 50 bài / tháng <i>↗</i></span></label>
+            </div>
+          </fieldset>
         </div>
-        <div class="form-section" id="part3"><div class="form-chapter"><span>CHƯƠNG 03 <i></i> 04</span><h3>Một mức phí dễ tiếp cận.</h3><p>Chúng tôi muốn hiểu giá trị mà Thầy/Cô cảm nhận được, không mặc định ai cũng cần trả phí.</p></div>
-          <fieldset class="question required" data-key="payPerImage"><legend><span class="q-count">09</span> Nếu một lượt tạo ảnh AI chất lượng cao có giá khoảng 1.000đ, Thầy/Cô nghĩ sao? <span class="req">*</span></legend><p class="question-hint">Mức 1.000đ chỉ là ví dụ để khảo sát, không đảm bảo ảnh luôn đạt yêu cầu.</p><div class="choice-stack"><label class="choice"><input type="radio" name="payPerImage" value="Hợp lý, sẵn sàng sử dụng" required/><span>Hợp lý, sẵn sàng sử dụng <i>↗</i></span></label><label class="choice"><input type="radio" name="payPerImage" value="Hợp lý nếu ảnh đạt yêu cầu"/><span>Hợp lý nếu chất lượng đáp ứng yêu cầu <i>↗</i></span></label><label class="choice"><input type="radio" name="payPerImage" value="Chấp nhận nếu ít phải tạo lại"/><span>Có thể chấp nhận nếu ít phải tạo lại <i>↗</i></span></label><label class="choice"><input type="radio" name="payPerImage" value="Mong giá thấp hơn"/><span>Mong muốn mức giá thấp hơn <i>↗</i></span></label><label class="choice"><input type="radio" name="payPerImage" value="Chỉ sử dụng miễn phí"/><span>Chỉ muốn sử dụng miễn phí <i>↗</i></span></label></div></fieldset>
-          <fieldset class="question required" data-key="monthlyBudget"><legend><span class="q-count">10</span> Ngân sách AI phù hợp mỗi tháng là bao nhiêu? <span class="req">*</span></legend><div class="choice-grid two"><label class="choice"><input type="radio" name="monthlyBudget" value="Miễn phí" required/><span>Chỉ miễn phí <i>↗</i></span></label><label class="choice"><input type="radio" name="monthlyBudget" value="Dưới 29.000đ"/><span>Dưới 29.000đ <i>↗</i></span></label><label class="choice"><input type="radio" name="monthlyBudget" value="29.000–49.000đ"/><span>29.000–49.000đ <i>↗</i></span></label><label class="choice"><input type="radio" name="monthlyBudget" value="50.000–79.000đ"/><span>50.000–79.000đ <i>↗</i></span></label><label class="choice"><input type="radio" name="monthlyBudget" value="80.000–129.000đ"/><span>80.000–129.000đ <i>↗</i></span></label><label class="choice"><input type="radio" name="monthlyBudget" value="Trên 129.000đ"/><span>Trên 129.000đ <i>↗</i></span></label></div></fieldset>
-          <fieldset class="question"><legend><span class="q-count">11</span> Thầy/Cô muốn thanh toán như thế nào?</legend><div class="choice-stack"><label class="choice"><input type="radio" name="paymentModel" value="Miễn phí giới hạn"/><span>Miễn phí với giới hạn sử dụng <i>↗</i></span></label><label class="choice"><input type="radio" name="paymentModel" value="Theo từng lượt"/><span>Thanh toán theo từng lượt tạo ảnh <i>↗</i></span></label><label class="choice"><input type="radio" name="paymentModel" value="Mua lượt dùng dần"/><span>Mua lượt dùng dần (nạp số dư) <i>↗</i></span></label><label class="choice"><input type="radio" name="paymentModel" value="Gói tháng"/><span>Đăng ký gói hàng tháng <i>↗</i></span></label><label class="choice"><input type="radio" name="paymentModel" value="Nhà trường thanh toán"/><span>Nhà trường cung cấp tài khoản <i>↗</i></span></label></div></fieldset>
+
+        <!-- CHƯƠNG 03 -->
+        <div class="form-section" id="part3">
+          <div class="form-chapter">
+            <span>CHƯƠNG 03 <i></i> 04</span>
+            <h3>Chi phí linh hoạt & Ngân sách phù hợp.</h3>
+            <p>Tính phí minh bạch theo độ khó và chất lượng thực tế, luôn báo trước rõ ràng.</p>
+          </div>
+
+          <fieldset class="question required" data-key="flexiblePricing">
+            <legend><span class="q-count">09</span> Ez-Elearning dự kiến tính phí linh hoạt theo độ khó và chất lượng thực tế: Ảnh minh họa chuẩn nét khoảng 1.000 đ/ảnh; soạn bài/câu hỏi cơ bản chi phí rất thấp; riêng câu hỏi khó, phân hóa (vận dụng cao) dùng mô hình AI thông minh hơn sẽ có mức phí tương ứng (luôn báo trước rõ ràng). Thầy/Cô thấy cơ chế này thế nào? <span class="req">*</span></legend>
+            <p class="question-hint">Chi phí tính theo từng lần dùng thực tế, không bắt buộc mua gói cố định.</p>
+            <div class="choice-stack">
+              <label class="choice"><input type="radio" name="flexiblePricing" value="Rất hợp lý" required/><span>Rất hợp lý: Bài khó hoặc ảnh đẹp thì dùng mô hình AI xịn hơn, trả phí tương xứng là hoàn toàn thỏa đáng <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="flexiblePricing" value="Hợp lý nếu được lựa chọn"/><span>Hợp lý nếu được lựa chọn: Đồng ý nếu hệ thống luôn báo trước chi phí và cho phép tự chọn mức độ (Cơ bản hay Chuyên sâu) <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="flexiblePricing" value="Cần có lượt dùng thử"/><span>Cần có lượt dùng thử: Cần tặng số dư ban đầu để trải nghiệm kiểm chứng trước khi nạp tiền <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="flexiblePricing" value="Mong muốn đồng giá"/><span>Mong muốn đồng giá: Tôi thích một mức phí cào bằng cố định cho mọi lượt, bất kể câu dễ hay khó <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="flexiblePricing" value="Chỉ muốn dùng miễn phí"/><span>Chỉ muốn dùng miễn phí: Tôi chỉ muốn sử dụng các công cụ hoàn toàn không mất phí <i>↗</i></span></label>
+            </div>
+          </fieldset>
+
+          <fieldset class="question required" data-key="monthlyBudget">
+            <legend><span class="q-count">10</span> Ngân sách Thầy/Cô cảm thấy thoải mái chi trả cho công cụ giảng dạy mỗi tháng là bao nhiêu? <span class="req">*</span></legend>
+            <div class="choice-grid two">
+              <label class="choice"><input type="radio" name="monthlyBudget" value="Miễn phí" required/><span>Chỉ miễn phí (0 đ) <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="monthlyBudget" value="Dưới 29.000đ"/><span>Dưới 29.000 đ <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="monthlyBudget" value="29.000–49.000đ"/><span>29.000 đ – 49.000 đ <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="monthlyBudget" value="50.000–79.000đ"/><span>50.000 đ – 79.000 đ <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="monthlyBudget" value="80.000–129.000đ"/><span>80.000 đ – 129.000 đ <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="monthlyBudget" value="Trên 129.000đ"/><span>Trên 129.000 đ <i>↗</i></span></label>
+            </div>
+          </fieldset>
         </div>
-        <div class="form-section" id="part4"><div class="form-chapter"><span>CHƯƠNG 04 <i></i> 04</span><h3>Phần quan trọng nhất:<br/><em>Tiếng nói của Thầy Cô.</em></h3><p>Chúng tôi muốn biết tính năng nào thực sự hữu ích, thay vì tự quyết định tất cả.</p></div>
-          <fieldset class="question required" data-key="features"><legend><span class="q-count">12</span> Thầy/Cô mong Ez-Elearning bổ sung tính năng nào? <span class="req">*</span></legend><p class="question-hint">Chọn ít nhất một tính năng mong muốn.</p><div class="choice-stack"><label class="choice check"><input type="checkbox" name="features" value="Tự động làm rõ yêu cầu theo môn học"/><span>Tự động làm rõ yêu cầu theo môn học <i>+</i></span></label><label class="choice check"><input type="checkbox" name="features" value="Kiểm tra chữ tiếng Việt"/><span>Kiểm tra lỗi chữ tiếng Việt trong ảnh <i>+</i></span></label><label class="choice check"><input type="checkbox" name="features" value="Chỉnh sửa ảnh AI"/><span>Chỉnh sửa ảnh AI đã tạo <i>+</i></span></label><label class="choice check"><input type="checkbox" name="features" value="Tạo câu hỏi, đề kiểm tra"/><span>Tạo câu hỏi và đề kiểm tra theo ma trận <i>+</i></span></label><label class="choice check"><input type="checkbox" name="features" value="Sơ đồ và infographic"/><span>Tạo sơ đồ, biểu đồ và hình minh họa trực quan <i>+</i></span></label><label class="choice check"><input type="checkbox" name="features" value="Lưu lịch sử AI"/><span>Lưu lịch sử và tái sử dụng kết quả <i>+</i></span></label><label class="choice check"><input type="checkbox" name="features" value="Trợ lý theo chương trình giáo dục"/><span>Trợ lý hỗ trợ theo chương trình giáo dục <i>+</i></span></label><label class="choice check"><input type="checkbox" name="features" value="Thư viện tài nguyên dùng chung"/><span>Thư viện tài nguyên giáo dục dùng chung <i>+</i></span></label></div></fieldset>
-          <div class="question"><label class="field-label" for="suggestion"><span class="q-count">13</span> Ngoài những điều trên, Thầy/Cô muốn đề xuất thêm tính năng gì?</label><p class="question-hint">Hãy chia sẻ thật thoải mái — ý tưởng nhỏ cũng có thể tạo ra thay đổi lớn.</p><textarea id="suggestion" name="suggestion" class="text-input text-area" rows="5" maxlength="1600" placeholder="Ví dụ: Tôi muốn có thể tạo ảnh từ đoạn văn, giữ nhân vật nhất quán qua nhiều ảnh..."></textarea></div>
-          <div class="question"><label class="field-label" for="contact"><span class="q-count">14</span> Thư điện tử (email) để nhận thông tin trải nghiệm thử (không bắt buộc)</label><input type="email" id="contact" name="contact" class="text-input" maxlength="250" placeholder="email@example.com"/><p class="question-hint">Chỉ liên hệ về Ez-Elearning nếu Thầy/Cô chủ động cung cấp email.</p></div>
-          <div class="consent-box"><label><input type="checkbox" name="consent" required/><span>Tôi đồng ý cho Ez-Elearning lưu và tổng hợp câu trả lời nhằm nghiên cứu, cải thiện sản phẩm. <b>Không công khai thông tin cá nhân.</b></span></label></div>
+
+        <!-- CHƯƠNG 04 -->
+        <div class="form-section" id="part4">
+          <div class="form-chapter">
+            <span>CHƯƠNG 04 <i></i> 04</span>
+            <h3>Trải nghiệm thực tế & Tiếng nói Thầy Cô.</h3>
+            <p>Mỗi phản hồi của Thầy/Cô đều trực tiếp định hình cách Ez-Elearning phục vụ giáo dục.</p>
+          </div>
+
+          <fieldset class="question" data-key="primaryDevice">
+            <legend><span class="q-count">11</span> Thầy/Cô thường thao tác soạn giáo án và làm việc trên thiết bị nào?</legend>
+            <div class="choice-grid two">
+              <label class="choice"><input type="radio" name="primaryDevice" value="Máy tính (Laptop / PC)"/><span>Chủ yếu trên Máy tính (Laptop / PC) <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="primaryDevice" value="Điện thoại thông minh"/><span>Chủ yếu trên Điện thoại thông minh <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="primaryDevice" value="Cả máy tính và điện thoại"/><span>Kết hợp cả máy tính và điện thoại <i>↗</i></span></label>
+              <label class="choice"><input type="radio" name="primaryDevice" value="Máy tính bảng (iPad / Tablet)"/><span>Trên Máy tính bảng (iPad / Tablet) <i>↗</i></span></label>
+            </div>
+          </fieldset>
+
+          <div class="question">
+            <label class="field-label" for="suggestion"><span class="q-count">12</span> Thầy/Cô có đề xuất hoặc mong muốn Ez-Elearning hỗ trợ thêm điều gì?</label>
+            <p class="question-hint">Hãy chia sẻ thật thoải mái — ý tưởng nhỏ cũng có thể giúp việc giảng dạy nhẹ nhàng hơn rất nhiều.</p>
+            <textarea id="suggestion" name="suggestion" class="text-input text-area" rows="5" maxlength="1600" placeholder="Ví dụ: Tôi muốn có kho giáo án mẫu theo môn, xuất đề thi sang cả PowerPoint, có nút hỗ trợ chỉnh cỡ chữ to..."></textarea>
+          </div>
+
+          <div class="question">
+            <label class="field-label" for="contact"><span class="q-count">13</span> Số điện thoại / Zalo hoặc Email để nhận quà tặng số dư trải nghiệm miễn phí (không bắt buộc)</label>
+            <input type="text" id="contact" name="contact" class="text-input" maxlength="250" placeholder="Ví dụ: 0912xxx hoặc giaovien@gmail.com"/>
+            <p class="question-hint">Chỉ dùng để gửi thông tin kích hoạt trải nghiệm Ez-Elearning và hoàn toàn bảo mật.</p>
+          </div>
+
+          <div class="consent-box">
+            <label><input type="checkbox" name="consent" required/><span>Tôi đồng ý cho Ez-Elearning lưu và tổng hợp câu trả lời nhằm nghiên cứu, cải thiện sản phẩm. <b>Không công khai thông tin cá nhân.</b></span></label>
+          </div>
+
           <div id="formAlert" class="form-alert" role="alert" aria-live="polite" hidden></div>
           <div class="draft-indicator" id="draftIndicator" aria-live="polite"><span>✓</span> Đã tự động lưu nháp câu trả lời trên máy của Thầy/Cô</div>
-          <button type="submit" class="submit-btn" id="submitBtn"><span>Gửi ý kiến của Thầy Cô</span><span class="submit-arrow">↗</span></button><p class="submit-hint">Cảm ơn Thầy/Cô đã dành thời gian giúp Ez-Elearning trở nên tốt hơn. ♡</p>
+          <button type="submit" class="submit-btn" id="submitBtn"><span>Gửi ý kiến của Thầy Cô</span><span class="submit-arrow">↗</span></button>
+          <p class="submit-hint">Cảm ơn Thầy/Cô đã dành thời gian giúp Ez-Elearning trở nên tốt hơn. ♡</p>
         </div>
       </form>
       </div>

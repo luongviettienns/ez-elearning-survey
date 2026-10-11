@@ -10,7 +10,13 @@ const storage = createStorage({
   cloud: IS_VERCEL, dataDir: process.env.DATA_DIR || './data'
 });
 
-const allowedFields = ['level','subject','aiExperience','aiNeeds','imageTroubles','imageRetries','imageTypes','imageValue','monthlyUses','payPerImage','monthlyBudget','paymentModel','features','suggestion','contact'];
+const allowedFields = [
+  'level','subject','aiExperience',
+  'timeConsumingTasks','lessonPlanTroubles','quizExpectations','visualNeeds','monthlyWorkload',
+  'flexiblePricing','monthlyBudget',
+  'primaryDevice','suggestion','contact',
+  'aiNeeds','imageTroubles','imageRetries','imageTypes','imageValue','monthlyUses','payPerImage','paymentModel','features'
+];
 
 function sanitizeText(value, max = 250) {
   return typeof value === 'string' ? value.trim().slice(0, max).replace(/[\u0000-\u001f\u007f]/g, ' ') : '';
@@ -21,10 +27,11 @@ function cleanAnswers(obj) {
   for (const key of allowedFields) {
     const val = obj[key];
     result[key] = Array.isArray(val)
-      ? val.slice(0, 12).filter(x => typeof x === 'string').map(x => sanitizeText(x, 160))
+      ? val.slice(0, 15).filter(x => typeof x === 'string').map(x => sanitizeText(x, 200))
       : sanitizeText(val, key === 'suggestion' ? 1600 : 250);
   }
-  if (!result.level || !result.aiExperience || !result.payPerImage || !result.monthlyBudget || !Array.isArray(result.features) || !result.features.length) {
+  const hasPricing = Boolean(result.flexiblePricing || result.payPerImage);
+  if (!result.level || !result.aiExperience || !hasPricing || !result.monthlyBudget) {
     throw Object.assign(new Error('Vui lòng hoàn tất các câu hỏi bắt buộc.'), { status: 400 });
   }
   return result;
@@ -122,7 +129,7 @@ export default async function handler(req, res) {
             level: r.answers?.level
           })),
           groups: Object.fromEntries(
-            ['level','aiExperience','imageTroubles','imageValue','imageRetries','payPerImage','monthlyBudget','paymentModel','features']
+            ['level','aiExperience','timeConsumingTasks','lessonPlanTroubles','quizExpectations','visualNeeds','monthlyWorkload','flexiblePricing','monthlyBudget','primaryDevice','payPerImage','features']
               .map(f => [f, group(rows, f)])
           )
         });

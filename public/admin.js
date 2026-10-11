@@ -1,5 +1,19 @@
 const $=q=>document.querySelector(q);
-const titleMap={level:'Cấp học',aiExperience:'Kinh nghiệm dùng AI',imageTroubles:'Khó khăn khi tạo ảnh',imageValue:'Yếu tố quan trọng nhất',imageRetries:'Số lần phải tạo lại',payPerImage:'Ý kiến về giá 1.000đ/ảnh',monthlyBudget:'Ngân sách hàng tháng',paymentModel:'Hình thức thanh toán',features:'Tính năng được mong muốn'};
+const titleMap={
+  level:'01. Cấp học',
+  aiExperience:'03. Kinh nghiệm dùng AI',
+  timeConsumingTasks:'04. Khâu tốn thời gian nhất',
+  lessonPlanTroubles:'05. Khó khăn soạn giáo án 5512',
+  quizExpectations:'06. Yêu cầu với đề trắc nghiệm',
+  visualNeeds:'07. Nhu cầu đồ họa & sơ đồ',
+  monthlyWorkload:'08. Số lượng bài chuẩn bị/tháng',
+  flexiblePricing:'09. Ý kiến phí linh hoạt theo độ khó',
+  monthlyBudget:'10. Ngân sách hàng tháng',
+  primaryDevice:'11. Thiết bị soạn bài thường dùng',
+  payPerImage:'[Cũ] Ý kiến giá 1.000đ/ảnh',
+  imageTroubles:'[Cũ] Khó khăn khi tạo ảnh',
+  features:'[Cũ] Tính năng mong muốn'
+};
 let secret='';
 function showError(message){$('#adminError').textContent=message}
 async function authFetch(url){const response=await fetch(url,{headers:{Authorization:'Bearer '+secret},cache:'no-store'});if(!response.ok){const d=await response.json().catch(()=>({}));throw new Error(d.error||'Yêu cầu thất bại.')}return response;}

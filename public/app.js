@@ -133,7 +133,7 @@ if(hasObserver){
 
 function readAnswers(){
   const result={};
-  const fields=['level','subject','aiExperience','aiNeeds','imageTroubles','imageRetries','imageTypes','imageValue','monthlyUses','payPerImage','monthlyBudget','paymentModel','features','suggestion','contact'];
+  const fields=['level','subject','aiExperience','timeConsumingTasks','lessonPlanTroubles','quizExpectations','visualNeeds','monthlyWorkload','flexiblePricing','monthlyBudget','primaryDevice','suggestion','contact','aiNeeds','imageTroubles','imageRetries','imageTypes','imageValue','monthlyUses','payPerImage','paymentModel','features'];
   for(const key of fields){
     const values=$$(`input[name="${key}"]:checked`,form).map(x=>x.value);
     if($(`input[name="${key}"][type="checkbox"]`,form)) result[key]=values;
@@ -148,14 +148,13 @@ function alertMessage(message,target){
   else el.scrollIntoView({behavior:reduceMotion?'auto':'smooth',block:'center'});
 }
 function validate(){
-  const required=['level','aiExperience','payPerImage','monthlyBudget'];
+  const required=['level','aiExperience','flexiblePricing','monthlyBudget'];
   for(const k of required){
     if(!$(`input[name="${k}"]:checked`,form)){
       const target=$(`[data-key="${k}"]`,form);alertMessage('Vui lòng trả lời câu hỏi bắt buộc này trước khi gửi.',target);return false;
     }
   }
-  if(!$$('input[name="features"]:checked',form).length){alertMessage('Vui lòng chọn ít nhất một tính năng mà Thầy/Cô mong muốn.', $('[data-key="features"]',form));return false;}
-  if($('#contact').value&&!$('#contact').checkValidity()){alertMessage('Email chưa đúng định dạng. Thầy/Cô có thể sửa hoặc để trống.',$('#contact'));return false;}
+  if($('#contact').value&&$('#contact').value.includes('@')&&!$('#contact').checkValidity()){alertMessage('Email chưa đúng định dạng. Thầy/Cô có thể sửa hoặc để trống.',$('#contact'));return false;}
   if(!$('input[name="consent"]:checked',form)){alertMessage('Vui lòng xác nhận đồng ý với mục đích thu thập ý kiến.',$('.consent-box'));return false;}
   return true;
 }

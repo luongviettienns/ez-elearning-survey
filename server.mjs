@@ -31,14 +31,23 @@ function authorized(req) {
   return a.length === b.length && timingSafeEqual(a,b);
 }
 function sanitizeText(value, max=250) { return typeof value === 'string' ? value.trim().slice(0,max).replace(/[\u0000-\u001f\u007f]/g,' ') : ''; }
-const allowedFields = ['level','subject','aiExperience','aiNeeds','imageTroubles','imageRetries','imageTypes','imageValue','monthlyUses','payPerImage','monthlyBudget','paymentModel','features','suggestion','contact'];
+const allowedFields = [
+  'level','subject','aiExperience',
+  'timeConsumingTasks','lessonPlanTroubles','quizExpectations','visualNeeds','monthlyWorkload',
+  'flexiblePricing','monthlyBudget',
+  'primaryDevice','suggestion','contact',
+  'aiNeeds','imageTroubles','imageRetries','imageTypes','imageValue','monthlyUses','payPerImage','paymentModel','features'
+];
 function cleanAnswers(obj) {
   const result={};
   for (const key of allowedFields) {
     const val=obj[key];
-    result[key] = Array.isArray(val) ? val.slice(0,12).filter(x => typeof x === 'string').map(x=>sanitizeText(x,160)) : sanitizeText(val,key==='suggestion'?1600:250);
+    result[key] = Array.isArray(val) ? val.slice(0,15).filter(x => typeof x === 'string').map(x=>sanitizeText(x,200)) : sanitizeText(val,key==='suggestion'?1600:250);
   }
-  if (!result.level || !result.aiExperience || !result.payPerImage || !result.monthlyBudget || !Array.isArray(result.features) || !result.features.length) throw new Error('Vui lòng hoàn tất các câu hỏi bắt buộc.');
+  const hasPricing = Boolean(result.flexiblePricing || result.payPerImage);
+  if (!result.level || !result.aiExperience || !hasPricing || !result.monthlyBudget) {
+    throw new Error('Vui lòng hoàn tất các câu hỏi bắt buộc.');
+  }
   return result;
 }
 async function readBody(req) {
@@ -72,7 +81,7 @@ const server=http.createServer(async(req,res)=>{
     if (path.startsWith('/api/admin/')) {
       if(!authorized(req)) return send(res,401,{error:'Mật khẩu quản trị không hợp lệ hoặc chưa thiết lập ADMIN_KEY.'});
       const rows=await storage.getRecords();
-      if(path==='/api/admin/overview'&&req.method==='GET') return send(res,200,{count:rows.length,latest:rows.slice(0,10).map(r=>({id:r.id.slice(0,8),date:r.createdAt,subject:r.answers.subject,level:r.answers.level})),groups:Object.fromEntries(['level','aiExperience','imageTroubles','imageValue','imageRetries','payPerImage','monthlyBudget','paymentModel','features'].map(f=>[f,group(rows,f)]))});
+      if(path==='/api/admin/overview'&&req.method==='GET') return send(res,200,{count:rows.length,latest:rows.slice(0,10).map(r=>({id:r.id.slice(0,8),date:r.createdAt,subject:r.answers.subject,level:r.answers.level})),groups:Object.fromEntries(['level','aiExperience','timeConsumingTasks','lessonPlanTroubles','quizExpectations','visualNeeds','monthlyWorkload','flexiblePricing','monthlyBudget','primaryDevice','payPerImage','features'].map(f=>[f,group(rows,f)]))});
       if(path==='/api/admin/export.csv'&&req.method==='GET'){ const csv=writeCsv(rows); res.writeHead(200,{'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="ez-elearning-khao-sat.csv"','Cache-Control':'no-store'}); return res.end(csv); }
       if(path==='/api/admin/export.json'&&req.method==='GET') return send(res,200,rows,{'Content-Disposition':'attachment; filename="ez-elearning-khao-sat.json"'});
       return send(res,404,{error:'Không tìm thấy API.'});

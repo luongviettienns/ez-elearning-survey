@@ -25,7 +25,17 @@ npm start
 
 Hosting **Node.js chạy lâu dài** (VPS, Render có persistent disk, Railway có volume, ...): `npm start` + PORT được cấp bởi nền tảng + `ADMIN_KEY` đủ mạnh + `DATA_DIR` trỏ tới **volume lưu trữ bền vững**. Cấu hình HTTPS và sao lưu volume thường xuyên.
 
-**Quan trọng:** Không triển khai lưu trữ file JSONL này trên Vercel/serverless hoặc nền tảng có ổ đĩa tạm, vì dữ liệu có thể mất khi redeploy, restart hoặc scale. Trên Vercel, phải thay backend bằng Postgres/Supabase/Neon trước khi nhận phản hồi thật.
+### Vercel
+
+- Framework Preset: **Node.js**. Vercel dùng `server.mjs` làm HTTP server và phục vụ các tệp trong `public/`.
+- Đặt `SUPABASE_URL`, `SUPABASE_KEY` và `ADMIN_KEY` (ít nhất 12 ký tự) trong Environment Variables cho Production/Preview. Không upload `.env`.
+- Chạy `supabase.sql` trong Supabase SQL Editor để tạo bảng `submissions` trước khi nhận phản hồi thật.
+- Trên Vercel (`VERCEL=1`), server không tạo hoặc ghi file JSONL; chỉ lưu vào Supabase. Nếu thiếu cấu hình, `/api/health` trả 503 và gửi khảo sát bị từ chối. Endpoint này kiểm tra cấu hình, không kiểm tra kết nối database.
+- Khóa Supabase dạng `sb_publishable_...` hoặc `sb_secret_...` được gửi qua header `apikey`; khóa JWT cũ vẫn dùng thêm `Authorization: Bearer`.
+- Không rewrite `/api/*` sang `/api/index.js` khi dùng Node.js server: server tự xử lý các đường dẫn `/api/health`, `/api/survey` và `/api/admin/*`.
+- Sau khi cập nhật source và biến môi trường, deploy lại và kiểm tra `/`, `/admin`, `/api/health`.
+
+Chạy `npm test` để kiểm tra khởi động/lưu khảo sát khi quyền ghi filesystem bị khóa, xử lý lỗi Supabase và lưu file khi chạy local. Các bài kiểm tra dùng database HTTP giả lập, không gửi phản hồi vào Supabase thật.
 
 Không có OpenAI API key trong project: đây là trang **khảo sát** về tính năng AI, không tạo ảnh hoặc gọi AI. Chi phí 1.000đ/ảnh là giả định dùng trong khảo sát, không phải giá cố định hoặc cam kết chất lượng.
 

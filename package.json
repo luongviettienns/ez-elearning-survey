@@ -5,6 +5,7 @@
   "description": "Ez-Elearning — khảo sát nhu cầu AI dành cho giáo viên",
   "type": "module",
   "scripts": {
+    "test": "node --test",
     "start": "node server.mjs",
     "dev": "node --watch server.mjs"
   },

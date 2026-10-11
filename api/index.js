@@ -4,9 +4,19 @@ import { join, resolve } from 'node:path';
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_KEY = process.env.SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
-const SECRET = process.env.ADMIN_KEY || 'admin-secret-key-1234';
+const SECRET = process.env.ADMIN_KEY || '';
+const IS_VERCEL = process.env.VERCEL === '1';
+const SUPABASE_CONFIGURED = Boolean(SUPABASE_URL && SUPABASE_KEY);
+const SUPABASE_HEADERS = { apikey: SUPABASE_KEY,
+  ...(!SUPABASE_KEY.startsWith('sb_') ? { Authorization: `Bearer ${SUPABASE_KEY}` } : {}) };
 const DATA_DIR = resolve(process.env.DATA_DIR || './data');
 const STORE = join(DATA_DIR, 'submissions.jsonl');
+
+function requireCloudStorage() {
+  if (IS_VERCEL && !SUPABASE_CONFIGURED) {
+    throw Object.assign(new Error('Cần thiết lập SUPABASE_URL và SUPABASE_KEY trên Vercel để lưu phản hồi.'), { status: 503 });
+  }
+}
 
 const allowedFields = ['level','subject','aiExperience','aiNeeds','imageTroubles','imageRetries','imageTypes','imageValue','monthlyUses','payPerImage','monthlyBudget','paymentModel','features','suggestion','contact'];
 
@@ -36,12 +46,10 @@ function authorized(req) {
 }
 
 async function getRecords() {
+  requireCloudStorage();
   if (SUPABASE_URL && SUPABASE_KEY) {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/submissions?select=*&order=created_at.desc`, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`
-      }
+      headers: SUPABASE_HEADERS
     });
     if (!response.ok) {
       const err = await response.text();
@@ -69,12 +77,12 @@ async function getRecords() {
 }
 
 async function saveRecord(entry) {
+  requireCloudStorage();
   if (SUPABASE_URL && SUPABASE_KEY) {
     const response = await fetch(`${SUPABASE_URL}/rest/v1/submissions`, {
       method: 'POST',
       headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        ...SUPABASE_HEADERS,
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
@@ -129,10 +137,11 @@ export default async function handler(req, res) {
 
   try {
     if (pathname === '/api/health') {
-      return res.status(200).json({
-        ok: true,
-        storage: (SUPABASE_URL && SUPABASE_KEY) ? 'supabase' : 'local-file',
-        supabaseConfigured: Boolean(SUPABASE_URL && SUPABASE_KEY)
+      const ready = !IS_VERCEL || SUPABASE_CONFIGURED;
+      return res.status(ready ? 200 : 503).json({
+        ok: ready,
+        storage: SUPABASE_CONFIGURED ? 'supabase' : (IS_VERCEL ? 'unconfigured' : 'local-file'),
+        supabaseConfigured: SUPABASE_CONFIGURED
       });
     }
 
@@ -206,6 +215,6 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: 'Không tìm thấy API.' });
   } catch (err) {
     console.error('[API Error]', err);
-    return res.status(500).json({ error: err.message || 'Lỗi xử lý máy chủ.' });
+    return res.status(err.status || 500).json({ error: err.message || 'Lỗi xử lý máy chủ.' });
   }
 }

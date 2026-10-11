@@ -13,10 +13,20 @@ const STORE = join(DATA, 'submissions.jsonl');
 const SECRET = process.env.ADMIN_KEY || '';
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
 const SUPABASE_KEY = process.env.SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
+const IS_VERCEL = process.env.VERCEL === '1';
+const SUPABASE_CONFIGURED = Boolean(SUPABASE_URL && SUPABASE_KEY);
+const SUPABASE_HEADERS = { apikey: SUPABASE_KEY,
+  ...(!SUPABASE_KEY.startsWith('sb_') ? { Authorization: `Bearer ${SUPABASE_KEY}` } : {}) };
 const started = new Map();
 const MIME = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.ico':'image/x-icon', '.json':'application/json; charset=utf-8' };
 
-await mkdir(DATA, { recursive:true });
+if (!IS_VERCEL) await mkdir(DATA, { recursive:true });
+
+function requireCloudStorage() {
+  if (IS_VERCEL && !SUPABASE_CONFIGURED) {
+    throw Object.assign(new Error('Cần thiết lập SUPABASE_URL và SUPABASE_KEY trên Vercel để lưu phản hồi.'), { status: 503 });
+  }
+}
 
 function send(res, status, data, headers={}) {
   const body = typeof data === 'string' ? data : JSON.stringify(data);
@@ -41,16 +51,21 @@ function cleanAnswers(obj) {
   return result;
 }
 async function records() {
+  requireCloudStorage();
   if (SUPABASE_URL && SUPABASE_KEY) {
     try {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/submissions?select=*&order=created_at.desc`, {
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        headers: SUPABASE_HEADERS
       });
       if (res.ok) {
         const rows = await res.json();
         return rows.map(r => ({ id: r.id, createdAt: r.created_at, answers: r.answers }));
       }
-    } catch(e) { console.error('[Supabase records error]', e.message); }
+      throw new Error('Supabase trả mã ' + res.status);
+    } catch(e) {
+      console.error('[Supabase records error]', e.message);
+      throw Object.assign(new Error('Không thể lấy dữ liệu từ Supabase. Vui lòng kiểm tra cấu hình và bảng submissions.'), { status: 502 });
+    }
   }
   try { const raw=await readFile(STORE,'utf8'); return raw.split('\n').filter(Boolean).map(s=>{try{return JSON.parse(s)}catch{return null}}).filter(Boolean); }
   catch(e) { if(e.code==='ENOENT') return []; throw e; }
@@ -69,7 +84,10 @@ function group(rows,field) { const out={}; for (const r of rows){ const value=r.
 const server=http.createServer(async(req,res)=>{
   const path = new URL(req.url, 'http://localhost').pathname;
   try {
-    if (path==='/api/health') return send(res,200,{ok:true,storage:(SUPABASE_URL&&SUPABASE_KEY)?'supabase+local':'local-file'});
+    if (path==='/api/health') {
+      const ready = !IS_VERCEL || SUPABASE_CONFIGURED;
+      return send(res,ready ? 200 : 503,{ok:ready,storage:SUPABASE_CONFIGURED ? (IS_VERCEL ? 'supabase' : 'supabase+local') : (IS_VERCEL ? 'unconfigured' : 'local-file'),supabaseConfigured:SUPABASE_CONFIGURED});
+    }
     if (path==='/api/survey' && req.method==='POST') {
       if (!req.headers['content-type']?.includes('application/json')) return send(res,415,{error:'Content-Type phải là application/json.'});
       const ip=(req.socket.remoteAddress||'unknown'); const now=Date.now();
@@ -78,23 +96,26 @@ const server=http.createServer(async(req,res)=>{
       if (input.website) return send(res,200,{ok:true}); // honeypot
       if (input.consent !== true) return send(res,400,{error:'Cần đồng ý với mục đích thu thập phản hồi.'});
       const answers=cleanAnswers(input.answers||{});
+      requireCloudStorage();
       const entry={id:randomUUID(),createdAt:new Date().toISOString(),answers};
       if (SUPABASE_URL && SUPABASE_KEY) {
         try {
           const sRes = await fetch(`${SUPABASE_URL}/rest/v1/submissions`, {
             method: 'POST',
             headers: {
-              'apikey': SUPABASE_KEY,
-              'Authorization': `Bearer ${SUPABASE_KEY}`,
+              ...SUPABASE_HEADERS,
               'Content-Type': 'application/json',
               'Prefer': 'return=minimal'
             },
             body: JSON.stringify({ id: entry.id, created_at: entry.createdAt, answers: entry.answers })
           });
-          if (!sRes.ok) console.error('[Supabase save error]', sRes.status, await sRes.text());
-        } catch(err) { console.error('[Supabase save error]', err.message); }
+          if (!sRes.ok) throw new Error('Supabase trả mã ' + sRes.status);
+        } catch(err) {
+          console.error('[Supabase save error]', err.message);
+          throw Object.assign(new Error('Không thể lưu phản hồi vào Supabase. Vui lòng thử lại sau.'), { status: 502 });
+        }
       }
-      await appendFile(STORE,JSON.stringify(entry)+'\n',{encoding:'utf8',mode:0o600});
+      if (!IS_VERCEL) await appendFile(STORE,JSON.stringify(entry)+'\n',{encoding:'utf8',mode:0o600});
       started.set(ip,now);
       if(started.size>2000){ for(const [k,v] of started) if(now-v>3_600_000)started.delete(k); }
       return send(res,201,{ok:true,id:entry.id.slice(0,8).toUpperCase()});
@@ -116,6 +137,6 @@ const server=http.createServer(async(req,res)=>{
     res.writeHead(200, {'Content-Type':MIME[extname(file)]||'application/octet-stream','X-Content-Type-Options':'nosniff','Cache-Control':'no-store, must-revalidate'});
     if(req.method==='HEAD') return res.end();
     return createReadStream(file).pipe(res);
-  } catch(err) { console.error('[Ez-Elearning]',err); if(!res.headersSent)send(res,400,{error:err.message||'Có lỗi xảy ra.'}); else res.end(); }
+  } catch(err) { console.error('[Ez-Elearning]',err); if(!res.headersSent)send(res,err.status || 400,{error:err.message||'Có lỗi xảy ra.'}); else res.end(); }
 });
 server.listen(PORT,'0.0.0.0',()=>console.log(`Ez-Elearning: http://localhost:${PORT} | Admin: http://localhost:${PORT}/admin`));

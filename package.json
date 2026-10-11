@@ -9,5 +9,10 @@
     "start": "node server.mjs",
     "dev": "node --watch server.mjs"
   },
-  "engines": { "node": ">=20" }
+  "engines": {
+    "node": ">=20"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8"
+  }
 }

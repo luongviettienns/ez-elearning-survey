@@ -9,6 +9,7 @@ ENV NODE_ENV=production \
 
 COPY package.json ./
 COPY server.mjs ./
+COPY lib ./lib
 COPY public ./public
 
 RUN mkdir -p /app/data

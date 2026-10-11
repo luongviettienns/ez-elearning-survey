@@ -1,22 +1,14 @@
 import { timingSafeEqual, randomUUID } from 'node:crypto';
-import { readFile, appendFile, mkdir } from 'node:fs/promises';
-import { join, resolve } from 'node:path';
+import { createStorage } from '../lib/storage.mjs';
+import { clientHash } from '../lib/client-identity.mjs';
 
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
 const SECRET = process.env.ADMIN_KEY || '';
 const IS_VERCEL = process.env.VERCEL === '1';
-const SUPABASE_CONFIGURED = Boolean(SUPABASE_URL && SUPABASE_KEY);
-const SUPABASE_HEADERS = { apikey: SUPABASE_KEY,
-  ...(!SUPABASE_KEY.startsWith('sb_') ? { Authorization: `Bearer ${SUPABASE_KEY}` } : {}) };
-const DATA_DIR = resolve(process.env.DATA_DIR || './data');
-const STORE = join(DATA_DIR, 'submissions.jsonl');
-
-function requireCloudStorage() {
-  if (IS_VERCEL && !SUPABASE_CONFIGURED) {
-    throw Object.assign(new Error('Cần thiết lập SUPABASE_URL và SUPABASE_KEY trên Vercel để lưu phản hồi.'), { status: 503 });
-  }
-}
+const storage = createStorage({
+  url: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  key: process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY || '',
+  cloud: IS_VERCEL, dataDir: process.env.DATA_DIR || './data'
+});
 
 const allowedFields = ['level','subject','aiExperience','aiNeeds','imageTroubles','imageRetries','imageTypes','imageValue','monthlyUses','payPerImage','monthlyBudget','paymentModel','features','suggestion','contact'];
 
@@ -33,7 +25,7 @@ function cleanAnswers(obj) {
       : sanitizeText(val, key === 'suggestion' ? 1600 : 250);
   }
   if (!result.level || !result.aiExperience || !result.payPerImage || !result.monthlyBudget || !Array.isArray(result.features) || !result.features.length) {
-    throw new Error('Vui lòng hoàn tất các câu hỏi bắt buộc.');
+    throw Object.assign(new Error('Vui lòng hoàn tất các câu hỏi bắt buộc.'), { status: 400 });
   }
   return result;
 }
@@ -43,66 +35,6 @@ function authorized(req) {
   const got = (req.headers.authorization || '').replace(/^Bearer\s+/i, '');
   const a = Buffer.from(SECRET), b = Buffer.from(got);
   return a.length === b.length && timingSafeEqual(a, b);
-}
-
-async function getRecords() {
-  requireCloudStorage();
-  if (SUPABASE_URL && SUPABASE_KEY) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/submissions?select=*&order=created_at.desc`, {
-      headers: SUPABASE_HEADERS
-    });
-    if (!response.ok) {
-      const err = await response.text();
-      console.error('[Supabase Fetch Error]', err);
-      throw new Error('Không thể lấy dữ liệu từ Supabase (mã ' + response.status + '). Hãy chắc chắn bạn đã chạy file supabase.sql để tạo bảng.');
-    }
-    const data = await response.json();
-    return data.map(r => ({
-      id: r.id,
-      createdAt: r.created_at,
-      answers: r.answers
-    }));
-  }
-
-  // Fallback sang local file nếu không có Supabase
-  try {
-    const raw = await readFile(STORE, 'utf8');
-    return raw.split('\n').filter(Boolean).map(s => {
-      try { return JSON.parse(s); } catch { return null; }
-    }).filter(Boolean);
-  } catch (e) {
-    if (e.code === 'ENOENT') return [];
-    throw e;
-  }
-}
-
-async function saveRecord(entry) {
-  requireCloudStorage();
-  if (SUPABASE_URL && SUPABASE_KEY) {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/submissions`, {
-      method: 'POST',
-      headers: {
-        ...SUPABASE_HEADERS,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
-      body: JSON.stringify({
-        id: entry.id,
-        created_at: entry.createdAt,
-        answers: entry.answers
-      })
-    });
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('[Supabase Save Error]', errText);
-      throw new Error('Không thể lưu phản hồi vào Supabase (mã ' + response.status + '). Vui lòng kiểm tra đã chạy supabase.sql chưa.');
-    }
-    return;
-  }
-
-  // Fallback local file
-  await mkdir(DATA_DIR, { recursive: true });
-  await appendFile(STORE, JSON.stringify(entry) + '\n', { encoding: 'utf8', mode: 0o600 });
 }
 
 function csvEscape(v) {
@@ -137,11 +69,11 @@ export default async function handler(req, res) {
 
   try {
     if (pathname === '/api/health') {
-      const ready = !IS_VERCEL || SUPABASE_CONFIGURED;
+      const ready = !IS_VERCEL || (storage.configured && SECRET.length >= 12);
       return res.status(ready ? 200 : 503).json({
         ok: ready,
-        storage: SUPABASE_CONFIGURED ? 'supabase' : (IS_VERCEL ? 'unconfigured' : 'local-file'),
-        supabaseConfigured: SUPABASE_CONFIGURED
+        storage: storage.configured ? 'supabase' : (IS_VERCEL ? 'unconfigured' : 'local-file'),
+        supabaseConfigured: storage.configured
       });
     }
 
@@ -169,7 +101,7 @@ export default async function handler(req, res) {
         answers
       };
 
-      await saveRecord(entry);
+      await storage.saveRecord(entry, clientHash(req, { cloud: IS_VERCEL, secret: SECRET }));
       return res.status(201).json({ ok: true, id: entry.id.slice(0, 8).toUpperCase() });
     }
 
@@ -178,12 +110,12 @@ export default async function handler(req, res) {
         return res.status(401).json({ error: 'Mật khẩu quản trị không hợp lệ hoặc chưa thiết lập ADMIN_KEY.' });
       }
 
-      const rows = await getRecords();
+      const rows = await storage.getRecords();
 
       if (pathname === '/api/admin/overview' && req.method === 'GET') {
         return res.status(200).json({
           count: rows.length,
-          latest: rows.slice(-10).reverse().map(r => ({
+          latest: rows.slice(0, 10).map(r => ({
             id: r.id.slice(0, 8),
             date: r.createdAt,
             subject: r.answers?.subject,
@@ -215,6 +147,7 @@ export default async function handler(req, res) {
     return res.status(404).json({ error: 'Không tìm thấy API.' });
   } catch (err) {
     console.error('[API Error]', err);
+    if (err.status === 429) res.setHeader('Retry-After', '15');
     return res.status(err.status || 500).json({ error: err.message || 'Lỗi xử lý máy chủ.' });
   }
 }

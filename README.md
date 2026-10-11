@@ -4,7 +4,7 @@ Website dạng storytelling một trang, cuộn từ câu chuyện AI tới bi�
 
 ## Chạy thử trong máy (Windows / Mac / Linux)
 
-Yêu cầu **Node.js 20+**. Không cần cài npm packages.
+Yêu cầu **Node.js 20+**. Chạy server không cần npm packages; chạy tests cần `npm ci`.
 
 ```bash
 cd ez-elearning-survey
@@ -27,15 +27,14 @@ Hosting **Node.js chạy lâu dài** (VPS, Render có persistent disk, Railway c
 
 ### Vercel
 
-- Framework Preset: **Node.js**. Vercel dùng `server.mjs` làm HTTP server và phục vụ các tệp trong `public/`.
-- Đặt `SUPABASE_URL`, `SUPABASE_KEY` và `ADMIN_KEY` (ít nhất 12 ký tự) trong Environment Variables cho Production/Preview. Không upload `.env`.
-- Chạy `supabase.sql` trong Supabase SQL Editor để tạo bảng `submissions` trước khi nhận phản hồi thật.
-- Trên Vercel (`VERCEL=1`), server không tạo hoặc ghi file JSONL; chỉ lưu vào Supabase. Nếu thiếu cấu hình, `/api/health` trả 503 và gửi khảo sát bị từ chối. Endpoint này kiểm tra cấu hình, không kiểm tra kết nối database.
-- Khóa Supabase dạng `sb_publishable_...` hoặc `sb_secret_...` được gửi qua header `apikey`; khóa JWT cũ vẫn dùng thêm `Authorization: Bearer`.
-- Không rewrite `/api/*` sang `/api/index.js` khi dùng Node.js server: server tự xử lý các đường dẫn `/api/health`, `/api/survey` và `/api/admin/*`.
-- Sau khi cập nhật source và biến môi trường, deploy lại và kiểm tra `/`, `/admin`, `/api/health`.
+- Framework Preset: **Node.js**. Hai HTTP entrypoint dùng chung module lưu trữ và giới hạn gửi.
+- Đặt `SUPABASE_URL`, `SUPABASE_SECRET_KEY` (khóa server **sb_secret** hoặc JWT **service_role**) và `ADMIN_KEY` (ít nhất 12 ký tự). Không dùng publishable/anon cho backend.
+- **Làm theo [docs/ROLLOUT.md](docs/ROLLOUT.md) trước khi merge/deploy bản sửa**: cập nhật cả khóa cũ `SUPABASE_KEY`, redeploy code cũ, chạy `supabase.sql`, rồi deploy code mới.
+- Migration khóa đọc/ghi trực tiếp bằng public key; phản hồi chỉ được gửi qua API server. IP được băm HMAC, không lưu IP thô. PostgreSQL kiểm tra cooldown 15 giây và lưu phản hồi trong cùng transaction, áp dụng giữa các instance.
+- Admin thống kê/export đọc theo từng trang, sắp xếp phản hồi mới nhất trước. Health chỉ kiểm tra cấu hình, không kiểm tra kết nối hoặc quyền database.
+- Trên Vercel không ghi file local. Local không cấu hình Supabase vẫn dùng JSONL; nếu cấu hình Supabase thì chỉ lưu vào database.
 
-Chạy `npm test` để kiểm tra khởi động/lưu khảo sát khi quyền ghi filesystem bị khóa, xử lý lỗi Supabase và lưu file khi chạy local. Các bài kiểm tra dùng database HTTP giả lập, không gửi phản hồi vào Supabase thật.
+Chạy `npm ci` rồi `npm test` để kiểm tra. Production không cần thư viện npm ngoài; PGlite chỉ là dev dependency để kiểm tra quyền và transaction PostgreSQL trong RAM.
 
 Không có OpenAI API key trong project: đây là trang **khảo sát** về tính năng AI, không tạo ảnh hoặc gọi AI. Chi phí 1.000đ/ảnh là giả định dùng trong khảo sát, không phải giá cố định hoặc cam kết chất lượng.
 
@@ -46,7 +45,7 @@ Không có OpenAI API key trong project: đây là trang **khảo sát** về t�
 - Phải chấp thuận mục đích thu thập dữ liệu trước khi gửi.
 - `ADMIN_KEY` đặt trên **server**, không viết trong frontend, không commit.
 - Data lưu dạng JSONL (mỗi phản hồi 1 dòng); admin phải đăng nhập mới tải được.
-- Endpoint POST có honeypot, giới hạn dung lượng và tốc độ cơ bản. Với chiến dịch công khai lớn, cần thêm chống spam, log, backup và chính sách lưu/xóa dữ liệu.
+- Endpoint POST có honeypot và cooldown dùng chung trên Supabase. Với chiến dịch công khai lớn, cần thêm CAPTCHA hoặc bảo vệ tại Vercel Firewall; cooldown theo IP không ngăn được bot dùng nhiều IP.
 
 ## Cấu trúc
 

@@ -1,32 +1,23 @@
 import http from 'node:http';
-import { readFile, mkdir, appendFile, stat } from 'node:fs/promises';
+import { stat } from 'node:fs/promises';
 import { createReadStream } from 'node:fs';
-import { join, resolve, extname, sep } from 'node:path';
+import { resolve, extname, sep } from 'node:path';
 import { timingSafeEqual, randomUUID } from 'node:crypto';
+import { createStorage } from './lib/storage.mjs';
+import { clientHash } from './lib/client-identity.mjs';
 
 try { process.loadEnvFile?.(); } catch {}
 
 const PORT = Number(process.env.PORT || 3000);
 const ROOT = resolve('public');
-const DATA = resolve(process.env.DATA_DIR || './data');
-const STORE = join(DATA, 'submissions.jsonl');
 const SECRET = process.env.ADMIN_KEY || '';
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '';
-const SUPABASE_KEY = process.env.SUPABASE_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || '';
 const IS_VERCEL = process.env.VERCEL === '1';
-const SUPABASE_CONFIGURED = Boolean(SUPABASE_URL && SUPABASE_KEY);
-const SUPABASE_HEADERS = { apikey: SUPABASE_KEY,
-  ...(!SUPABASE_KEY.startsWith('sb_') ? { Authorization: `Bearer ${SUPABASE_KEY}` } : {}) };
-const started = new Map();
+const storage = createStorage({
+  url: process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || '',
+  key: process.env.SUPABASE_SECRET_KEY || process.env.SUPABASE_KEY || '',
+  cloud: IS_VERCEL, dataDir: process.env.DATA_DIR || './data'
+});
 const MIME = { '.html':'text/html; charset=utf-8', '.css':'text/css; charset=utf-8', '.js':'application/javascript; charset=utf-8', '.svg':'image/svg+xml', '.png':'image/png', '.ico':'image/x-icon', '.json':'application/json; charset=utf-8' };
-
-if (!IS_VERCEL) await mkdir(DATA, { recursive:true });
-
-function requireCloudStorage() {
-  if (IS_VERCEL && !SUPABASE_CONFIGURED) {
-    throw Object.assign(new Error('Cần thiết lập SUPABASE_URL và SUPABASE_KEY trên Vercel để lưu phản hồi.'), { status: 503 });
-  }
-}
 
 function send(res, status, data, headers={}) {
   const body = typeof data === 'string' ? data : JSON.stringify(data);
@@ -50,26 +41,6 @@ function cleanAnswers(obj) {
   if (!result.level || !result.aiExperience || !result.payPerImage || !result.monthlyBudget || !Array.isArray(result.features) || !result.features.length) throw new Error('Vui lòng hoàn tất các câu hỏi bắt buộc.');
   return result;
 }
-async function records() {
-  requireCloudStorage();
-  if (SUPABASE_URL && SUPABASE_KEY) {
-    try {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/submissions?select=*&order=created_at.desc`, {
-        headers: SUPABASE_HEADERS
-      });
-      if (res.ok) {
-        const rows = await res.json();
-        return rows.map(r => ({ id: r.id, createdAt: r.created_at, answers: r.answers }));
-      }
-      throw new Error('Supabase trả mã ' + res.status);
-    } catch(e) {
-      console.error('[Supabase records error]', e.message);
-      throw Object.assign(new Error('Không thể lấy dữ liệu từ Supabase. Vui lòng kiểm tra cấu hình và bảng submissions.'), { status: 502 });
-    }
-  }
-  try { const raw=await readFile(STORE,'utf8'); return raw.split('\n').filter(Boolean).map(s=>{try{return JSON.parse(s)}catch{return null}}).filter(Boolean); }
-  catch(e) { if(e.code==='ENOENT') return []; throw e; }
-}
 async function readBody(req) {
   return new Promise((resolveBody, reject) => {
     let body='', size=0;
@@ -85,45 +56,23 @@ const server=http.createServer(async(req,res)=>{
   const path = new URL(req.url, 'http://localhost').pathname;
   try {
     if (path==='/api/health') {
-      const ready = !IS_VERCEL || SUPABASE_CONFIGURED;
-      return send(res,ready ? 200 : 503,{ok:ready,storage:SUPABASE_CONFIGURED ? (IS_VERCEL ? 'supabase' : 'supabase+local') : (IS_VERCEL ? 'unconfigured' : 'local-file'),supabaseConfigured:SUPABASE_CONFIGURED});
+      const ready = !IS_VERCEL || (storage.configured && SECRET.length >= 12);
+      return send(res,ready ? 200 : 503,{ok:ready,storage:storage.configured ? 'supabase' : (IS_VERCEL ? 'unconfigured' : 'local-file'),supabaseConfigured:storage.configured});
     }
     if (path==='/api/survey' && req.method==='POST') {
       if (!req.headers['content-type']?.includes('application/json')) return send(res,415,{error:'Content-Type phải là application/json.'});
-      const ip=(req.socket.remoteAddress||'unknown'); const now=Date.now();
-      if (now-(started.get(ip)||0)<15_000) return send(res,429,{error:'Bạn gửi quá nhanh. Vui lòng thử lại sau ít giây.'});
       const input=await readBody(req);
       if (input.website) return send(res,200,{ok:true}); // honeypot
       if (input.consent !== true) return send(res,400,{error:'Cần đồng ý với mục đích thu thập phản hồi.'});
       const answers=cleanAnswers(input.answers||{});
-      requireCloudStorage();
       const entry={id:randomUUID(),createdAt:new Date().toISOString(),answers};
-      if (SUPABASE_URL && SUPABASE_KEY) {
-        try {
-          const sRes = await fetch(`${SUPABASE_URL}/rest/v1/submissions`, {
-            method: 'POST',
-            headers: {
-              ...SUPABASE_HEADERS,
-              'Content-Type': 'application/json',
-              'Prefer': 'return=minimal'
-            },
-            body: JSON.stringify({ id: entry.id, created_at: entry.createdAt, answers: entry.answers })
-          });
-          if (!sRes.ok) throw new Error('Supabase trả mã ' + sRes.status);
-        } catch(err) {
-          console.error('[Supabase save error]', err.message);
-          throw Object.assign(new Error('Không thể lưu phản hồi vào Supabase. Vui lòng thử lại sau.'), { status: 502 });
-        }
-      }
-      if (!IS_VERCEL) await appendFile(STORE,JSON.stringify(entry)+'\n',{encoding:'utf8',mode:0o600});
-      started.set(ip,now);
-      if(started.size>2000){ for(const [k,v] of started) if(now-v>3_600_000)started.delete(k); }
+      await storage.saveRecord(entry, clientHash(req, { cloud: IS_VERCEL, secret: SECRET }));
       return send(res,201,{ok:true,id:entry.id.slice(0,8).toUpperCase()});
     }
     if (path.startsWith('/api/admin/')) {
       if(!authorized(req)) return send(res,401,{error:'Mật khẩu quản trị không hợp lệ hoặc chưa thiết lập ADMIN_KEY.'});
-      const rows=await records();
-      if(path==='/api/admin/overview'&&req.method==='GET') return send(res,200,{count:rows.length,latest:rows.slice(-10).reverse().map(r=>({id:r.id.slice(0,8),date:r.createdAt,subject:r.answers.subject,level:r.answers.level})),groups:Object.fromEntries(['level','aiExperience','imageTroubles','imageValue','imageRetries','payPerImage','monthlyBudget','paymentModel','features'].map(f=>[f,group(rows,f)]))});
+      const rows=await storage.getRecords();
+      if(path==='/api/admin/overview'&&req.method==='GET') return send(res,200,{count:rows.length,latest:rows.slice(0,10).map(r=>({id:r.id.slice(0,8),date:r.createdAt,subject:r.answers.subject,level:r.answers.level})),groups:Object.fromEntries(['level','aiExperience','imageTroubles','imageValue','imageRetries','payPerImage','monthlyBudget','paymentModel','features'].map(f=>[f,group(rows,f)]))});
       if(path==='/api/admin/export.csv'&&req.method==='GET'){ const csv=writeCsv(rows); res.writeHead(200,{'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="ez-elearning-khao-sat.csv"','Cache-Control':'no-store'}); return res.end(csv); }
       if(path==='/api/admin/export.json'&&req.method==='GET') return send(res,200,rows,{'Content-Disposition':'attachment; filename="ez-elearning-khao-sat.json"'});
       return send(res,404,{error:'Không tìm thấy API.'});
@@ -137,6 +86,6 @@ const server=http.createServer(async(req,res)=>{
     res.writeHead(200, {'Content-Type':MIME[extname(file)]||'application/octet-stream','X-Content-Type-Options':'nosniff','Cache-Control':'no-store, must-revalidate'});
     if(req.method==='HEAD') return res.end();
     return createReadStream(file).pipe(res);
-  } catch(err) { console.error('[Ez-Elearning]',err); if(!res.headersSent)send(res,err.status || 400,{error:err.message||'Có lỗi xảy ra.'}); else res.end(); }
+  } catch(err) { console.error('[Ez-Elearning]',err); if(err.status===429)res.setHeader('Retry-After','15'); if(!res.headersSent)send(res,err.status || 400,{error:err.message||'Có lỗi xảy ra.'}); else res.end(); }
 });
 server.listen(PORT,'0.0.0.0',()=>console.log(`Ez-Elearning: http://localhost:${PORT} | Admin: http://localhost:${PORT}/admin`));

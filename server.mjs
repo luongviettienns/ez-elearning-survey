@@ -81,7 +81,12 @@ const server=http.createServer(async(req,res)=>{
     if (path.startsWith('/api/admin/')) {
       if(!authorized(req)) return send(res,401,{error:'Mật khẩu quản trị không hợp lệ hoặc chưa thiết lập ADMIN_KEY.'});
       const rows=await storage.getRecords();
-      if(path==='/api/admin/overview'&&req.method==='GET') return send(res,200,{count:rows.length,latest:rows.slice(0,10).map(r=>({id:r.id.slice(0,8),date:r.createdAt,subject:r.answers.subject,level:r.answers.level})),groups:Object.fromEntries(['level','aiExperience','timeConsumingTasks','lessonPlanTroubles','quizExpectations','visualNeeds','monthlyWorkload','flexiblePricing','monthlyBudget','primaryDevice','payPerImage','features'].map(f=>[f,group(rows,f)]))});
+      if(path==='/api/admin/overview'&&req.method==='GET') return send(res,200,{
+        count: rows.length,
+        latest: rows.slice(0,10).map(r=>({id:r.id.slice(0,8),date:r.createdAt,subject:r.answers?.subject,level:r.answers?.level})),
+        groups: Object.fromEntries(['level','aiExperience','timeConsumingTasks','lessonPlanTroubles','quizExpectations','visualNeeds','monthlyWorkload','flexiblePricing','monthlyBudget','primaryDevice','payPerImage','features'].map(f=>[f,group(rows,f)])),
+        submissions: rows.map(r => ({ id: r.id.slice(0,8).toUpperCase(), fullId: r.id, createdAt: r.createdAt, answers: r.answers || {} }))
+      });
       if(path==='/api/admin/export.csv'&&req.method==='GET'){ const csv=writeCsv(rows); res.writeHead(200,{'Content-Type':'text/csv; charset=utf-8','Content-Disposition':'attachment; filename="ez-elearning-khao-sat.csv"','Cache-Control':'no-store'}); return res.end(csv); }
       if(path==='/api/admin/export.json'&&req.method==='GET') return send(res,200,rows,{'Content-Disposition':'attachment; filename="ez-elearning-khao-sat.json"'});
       return send(res,404,{error:'Không tìm thấy API.'});

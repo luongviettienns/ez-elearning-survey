@@ -131,7 +131,13 @@ export default async function handler(req, res) {
           groups: Object.fromEntries(
             ['level','aiExperience','timeConsumingTasks','lessonPlanTroubles','quizExpectations','visualNeeds','monthlyWorkload','flexiblePricing','monthlyBudget','primaryDevice','payPerImage','features']
               .map(f => [f, group(rows, f)])
-          )
+          ),
+          submissions: rows.map(r => ({
+            id: r.id.slice(0, 8).toUpperCase(),
+            fullId: r.id,
+            createdAt: r.createdAt,
+            answers: r.answers || {}
+          }))
         });
       }
 

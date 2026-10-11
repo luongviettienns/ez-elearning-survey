@@ -1,0 +1,12 @@
+{
+  "name": "ez-elearning-survey",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Ez-Elearning — khảo sát nhu cầu AI dành cho giáo viên",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --watch server.mjs"
+  },
+  "engines": { "node": ">=20" }
+}
